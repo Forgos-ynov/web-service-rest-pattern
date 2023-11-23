@@ -1,0 +1,281 @@
+openapi: 3.0.0
+info:
+  title: Documentation de l'API de Forgos
+  version: 1.0.0
+  description: Pattern de la documentation de l'API de Forgos
+tags:
+  - name: Utilisateurs
+    description: Opérations liées aux utilisateurs
+  - name: Authentification
+    description: Opérations liées à l'authentification
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID de l'utilisateur.
+        firstName:
+          type: string
+          description: Prénom de l'utilisateur.
+        lastName:
+          type: string
+          description: Nom de l'utilisateur.
+        email:
+          type: string
+          description: Adresse e-mail de l'utilisateur.
+      example:
+        id: 1
+        firstName: John
+        lastName: Doe
+        email: johndoe@example.com
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+paths:
+  /api/users:
+    get:
+      summary: Récupérer tous les utilisateurs
+      description: Récupère la liste de tous les utilisateurs enregistrés.
+      responses:
+        200:
+          description: Succès - Récupération de la liste d'utilisateurs.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  eTag:
+                    type: string
+                    description: Étiquette ETag pour la réponse.
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        204:
+          description: Aucun contenu - Aucun utilisateur trouvé.
+        400:
+          description: Requête invalide.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Message d'erreur explicatif.
+      tags:
+        - Utilisateurs
+      security:
+        - BearerAuth: [ ]
+
+    post:
+      summary: Créer un nouvel utilisateur
+      description: Crée un nouvel utilisateur avec les données fournies.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        201:
+          description: Création réussie de l'utilisateur.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          description: Requête invalide.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Message d'erreur explicatif.
+        409:
+          description: Conflit - L'e-mail fourni existe déjà.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Message d'erreur explicatif.
+      tags:
+        - Utilisateurs
+      security:
+        - BearerAuth: [ ]
+
+  /api/users/{id}:
+    get:
+      summary: Récupérer un utilisateur par ID
+      description: Récupère un utilisateur en fonction de son ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID de l'utilisateur à récupérer.
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Succès - Récupération de l'utilisateur.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          description: Requête invalide.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Message d'erreur explicatif.
+        404:
+          description: Ressource non trouvée - Aucun utilisateur correspondant à cet ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Message d'erreur explicatif.
+      tags:
+        - Utilisateurs
+      security:
+        - BearerAuth: [ ]
+
+    put:
+      summary: Mettre à jour un utilisateur par ID
+      description: Met à jour un utilisateur en fonction de son ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID de l'utilisateur à mettre à jour.
+          schema:
+            type: integer
+        - in: body
+          name: user
+          required: true
+          description: Données de l'utilisateur à mettre à jour.
+          schema:
+            $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: Succès - Mise à jour de l'utilisateur.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          description: Requête invalide.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Message d'erreur explicatif.
+        404:
+          description: Ressource non trouvée - Aucun utilisateur correspondant à cet ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Message d'erreur explicatif.
+        409:
+          description: Conflit - L'email fourni existe déjà.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Message d'erreur explicatif.
+      tags:
+        - Utilisateurs
+      security:
+        - BearerAuth: [ ]
+
+    delete:
+      summary: Supprimer un utilisateur par ID
+      description: Supprime un utilisateur en fonction de son ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID de l'utilisateur à supprimer.
+          schema:
+            type: integer
+      responses:
+        204:
+          description: Succès - Utilisateur supprimé.
+        404:
+          description: Ressource non trouvée - Aucun utilisateur correspondant à cet ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Message d'erreur explicatif.
+        500:
+          description: Erreur serveur - L'utilisateur n'a pas pu être supprimé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Message d'erreur explicatif.
+      tags:
+        - Utilisateurs
+      security:
+        - BearerAuth: [ ]
+
+  /api/login:
+    post:
+      summary: Authentification de l'utilisateur
+      tags:
+        - Authentification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+            examples:
+              default:
+                value:
+                  email: "test@gmail.com"
+      responses:
+        200:
+          description: Authentification réussie
+        400:
+          description: Erreur d'authentification
